@@ -230,6 +230,26 @@ function Chat() {
     }
   };
 
+  // Diagnostic function
+  const checkDatabase = async () => {
+    try {
+      const usersRef = collection(db, 'users');
+      const snapshot = await getDocs(usersRef);
+      console.log('✅ Total users in database:', snapshot.size);
+      snapshot.docs.forEach(doc => {
+        console.log('  - User:', doc.id, doc.data());
+      });
+      if (snapshot.size === 0) {
+        alert('⚠️ No users found in database. Make sure you\'ve registered accounts.');
+      } else {
+        alert(`✅ Found ${snapshot.size} users in database!`);
+      }
+    } catch (error) {
+      console.error('❌ Database check error:', error);
+      alert('❌ Error checking database: ' + error.message);
+    }
+  };
+
   return (
     <div className="chat-container">
       {/* Users List Panel */}
@@ -237,21 +257,36 @@ function Chat() {
         <div className="chat-header">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
             <h3 style={{ margin: 0 }}>💬 Members ({users.length})</h3>
-            <button 
-              onClick={refreshUsers}
-              disabled={refreshing}
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: refreshing ? 'not-allowed' : 'pointer',
-                fontSize: '16px',
-                opacity: refreshing ? 0.5 : 1,
-                animation: refreshing ? 'spin 1s linear infinite' : 'none'
-              }}
-              title="Refresh users"
-            >
-              🔄
-            </button>
+            <div style={{ display: 'flex', gap: '5px' }}>
+              <button 
+                onClick={checkDatabase}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  opacity: 0.7
+                }}
+                title="Check database"
+              >
+                📊
+              </button>
+              <button 
+                onClick={refreshUsers}
+                disabled={refreshing}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: refreshing ? 'not-allowed' : 'pointer',
+                  fontSize: '16px',
+                  opacity: refreshing ? 0.5 : 1,
+                  animation: refreshing ? 'spin 1s linear infinite' : 'none'
+                }}
+                title="Refresh users"
+              >
+                🔄
+              </button>
+            </div>
           </div>
         </div>
 
