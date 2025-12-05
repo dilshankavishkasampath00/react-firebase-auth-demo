@@ -706,7 +706,9 @@
 @media (min-width: 600px) and (max-width: 799px) {
   .dashboard-container {
     grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto auto;
+    grid-template-rows: auto 1fr;
+    height: 100vh;
+    overflow: hidden;
   }
 
   .dashboard-navbar {
@@ -724,6 +726,8 @@
 
   .dashboard-main {
     padding: 15px;
+    height: 100%;
+    overflow-y: auto;
   }
 
   .dashboard-right {
@@ -743,8 +747,9 @@
 @media (min-width: 480px) and (max-width: 599px) {
   .dashboard-container {
     grid-template-columns: 1fr;
-    height: auto;
-    min-height: 100vh;
+    grid-template-rows: auto 1fr;
+    height: 100vh;
+    overflow: hidden;
   }
 
   .dashboard-navbar {
@@ -762,7 +767,8 @@
 
   .dashboard-main {
     padding: 12px;
-    height: auto;
+    height: 100%;
+    overflow-y: auto;
   }
 
   .dashboard-right {
@@ -782,8 +788,9 @@
 
   .dashboard-container {
     grid-template-columns: 1fr;
-    height: auto;
-    min-height: 100vh;
+    grid-template-rows: auto 1fr;
+    height: 100vh;
+    overflow: hidden;
   }
 
   .dashboard-navbar {
@@ -801,7 +808,8 @@
 
   .dashboard-main {
     padding: 10px;
-    height: auto;
+    height: 100%;
+    overflow-y: auto;
   }
 
   .dashboard-right {
@@ -831,8 +839,9 @@
 
   .dashboard-container {
     grid-template-columns: 1fr;
-    height: auto;
-    min-height: 100vh;
+    grid-template-rows: auto 1fr;
+    height: 100vh;
+    overflow: hidden;
   }
 
   .dashboard-navbar {
@@ -850,7 +859,8 @@
 
   .dashboard-main {
     padding: 8px;
-    height: auto;
+    height: 100%;
+    overflow-y: auto;
   }
 
   .dashboard-right {

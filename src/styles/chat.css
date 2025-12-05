@@ -596,6 +596,8 @@
 @media (max-width: 599px) {
   .chat-container {
     grid-template-columns: 1fr;
+    height: 100%;
+    border-radius: 0;
   }
 
   .chat-sidebar {
@@ -646,7 +648,8 @@
 @media (max-width: 479px) {
   .chat-container {
     grid-template-columns: 1fr;
-    border-radius: 8px;
+    border-radius: 0;
+    height: 100%;
   }
 
   .chat-sidebar {
@@ -758,7 +761,8 @@
 /* Extra Small Mobile (320px - 359px) */
 @media (max-width: 359px) {
   .chat-container {
-    border-radius: 6px;
+    border-radius: 0;
+    height: 100%;
   }
 
   .chat-header {
