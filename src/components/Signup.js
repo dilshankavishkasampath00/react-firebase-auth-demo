@@ -109,12 +109,13 @@ function Signup() {
   return (
     <div className="auth-container">
       <h2>Create Account</h2>
+      <p className="auth-subtitle">Join us today to get started</p>
       
       {error && <div className={`alert alert-error show`}>{error}</div>}
       
       <form onSubmit={handleSignup}>
         <div className="form-group">
-          <label>Full Name</label>
+          <label>👤 Full Name</label>
           <input 
             type="text" 
             value={name} 
@@ -125,7 +126,7 @@ function Signup() {
         </div>
 
         <div className="form-group">
-          <label>Email Address</label>
+          <label>📧 Email Address</label>
           <input 
             type="email" 
             value={email} 
@@ -136,35 +137,35 @@ function Signup() {
         </div>
 
       <div className="form-group">
-        <label>Password</label>
+        <label>🔐 Password</label>
         <input 
           type="password" 
           value={password} 
           onChange={e => setPassword(e.target.value)} 
-          placeholder="At least 6 characters" 
+          placeholder="••••••••" 
           required 
         />
       </div>
 
       <div className="form-group">
-        <label>Confirm Password</label>
+        <label>✓ Confirm Password</label>
         <input 
           type="password" 
           value={confirmPassword} 
           onChange={e => setConfirmPassword(e.target.value)} 
-          placeholder="Confirm your password" 
+          placeholder="••••••••" 
           required 
         />
       </div>
 
         <button type="submit" className={`btn-primary ${loading ? 'loading' : ''}`} disabled={loading}>
-          {loading ? 'Creating Account...' : 'Sign Up'}
+          {loading ? 'Creating Account...' : 'Create Account'}
         </button>
       </form>
 
-      <div className="divider">OR</div>
+      <div className="divider">Continue With</div>
 
-      <div style={{display: 'flex', gap: '10px', marginBottom: '10px'}}>
+      <div style={{display: 'flex', gap: '12px', marginBottom: '15px'}}>
         <button onClick={handleGoogleSignup} className={`btn-social ${loading ? 'loading' : ''}`} disabled={loading} style={{flex: 1}}>
           <svg className="social-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -184,7 +185,7 @@ function Signup() {
       </div>
 
       <div className="link-text">
-        Already have an account? <button onClick={() => navigate('/')}>Login</button>
+        Already have an account? <button onClick={() => navigate('/')}>Sign In</button>
       </div>
     </div>
   );

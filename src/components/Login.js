@@ -79,40 +79,41 @@ function Login() {
   return (
     <div className="auth-container">
       <h2>Welcome Back</h2>
+      <p className="auth-subtitle">Sign in to your account</p>
       
       {error && <div className={`alert alert-error show`}>{error}</div>}
       
       <form onSubmit={handleLogin}>
         <div className="form-group">
-          <label>Email Address</label>
+          <label>📧 Email Address</label>
           <input 
             type="email" 
             value={email} 
             onChange={e => setEmail(e.target.value)} 
-            placeholder="Enter your email" 
+            placeholder="you@example.com" 
             required 
           />
         </div>
 
         <div className="form-group">
-          <label>Password</label>
+          <label>🔐 Password</label>
           <input 
             type="password" 
             value={password} 
             onChange={e => setPassword(e.target.value)} 
-            placeholder="Enter your password" 
+            placeholder="••••••••" 
             required 
           />
         </div>
         
         <button type="submit" className={`btn-primary ${loading ? 'loading' : ''}`} disabled={loading}>
-          {loading ? 'Logging in...' : 'Login'}
+          {loading ? 'Logging in...' : 'Sign In'}
         </button>
       </form>
 
-      <div className="divider">OR</div>
+      <div className="divider">Continue With</div>
 
-      <div style={{display: 'flex', gap: '10px', marginBottom: '10px'}}>
+      <div style={{display: 'flex', gap: '12px', marginBottom: '15px'}}>
         <button onClick={handleGoogleLogin} className={`btn-social ${loading ? 'loading' : ''}`} disabled={loading} style={{flex: 1}}>
           <svg className="social-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -132,11 +133,11 @@ function Login() {
       </div>
 
       <div className="link-text">
-        Don't have an account? <button onClick={() => navigate('/signup')}>Sign Up</button>
+        Don't have an account? <button onClick={() => navigate('/signup')}>Create one</button>
       </div>
 
       <div className="link-text">
-        <button onClick={() => navigate('/forgot-password')}>Forgot your password?</button>
+        <button onClick={() => navigate('/forgot-password')}>Forgot password?</button>
       </div>
     </div>
   );

@@ -30,16 +30,14 @@ function ForgotPassword() {
   return (
     <div className="auth-container">
       <h2>Reset Password</h2>
-      <p style={{textAlign: 'center', color: '#666', marginBottom: '20px'}}>
-        Enter your email and we'll send you a link to reset your password.
-      </p>
+      <p className="auth-subtitle">Enter your email to receive a reset link</p>
       
       {error && <div className={`alert alert-error show`}>{error}</div>}
       {message && <div className={`alert alert-success show`}>{message}</div>}
       
       <form onSubmit={handleReset}>
         <div className="form-group">
-          <label>Email Address</label>
+          <label>📧 Email Address</label>
           <input 
             type="email" 
             value={email} 
@@ -56,7 +54,11 @@ function ForgotPassword() {
       </form>
 
       <div className="link-text">
-        Remember your password? <button onClick={() => navigate('/')}>Login</button>
+        Remember your password? <button onClick={() => navigate('/')}>Back to Login</button>
+      </div>
+
+      <div className="link-text">
+        Don't have an account? <button onClick={() => navigate('/signup')}>Create one</button>
       </div>
     </div>
   );
