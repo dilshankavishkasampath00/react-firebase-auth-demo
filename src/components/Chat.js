@@ -23,6 +23,7 @@ function Chat() {
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+  const [unreadCounts, setUnreadCounts] = useState({}); // Track unread messages per user
   const messagesEndRef = useRef(null);
   const currentUser = auth.currentUser;
 
@@ -55,6 +56,31 @@ function Chat() {
 
     return () => unsubscribe();
   }, [currentUser]);
+
+  // Monitor unread messages for all users
+  useEffect(() => {
+    if (!currentUser || users.length === 0) return;
+
+    const unsubscribers = users.map(user => {
+      const conversationId = [currentUser.uid, user.id].sort().join('_');
+      const messagesRef = collection(db, 'conversations', conversationId, 'messages');
+      
+      const unsubscribe = onSnapshot(messagesRef, (snapshot) => {
+        const unreadCount = snapshot.docs.filter(doc => 
+          doc.data().receiverId === currentUser.uid && !doc.data().read
+        ).length;
+        
+        setUnreadCounts(prev => ({
+          ...prev,
+          [user.id]: unreadCount
+        }));
+      });
+      
+      return unsubscribe;
+    });
+
+    return () => unsubscribers.forEach(unsub => unsub());
+  }, [currentUser, users]);
 
   // Manual refresh users
   const refreshUsers = async () => {
@@ -112,12 +138,20 @@ function Chat() {
     const messagesRef = collection(db, 'conversations', conversationId, 'messages');
     const q = query(messagesRef, orderBy('timestamp', 'asc'));
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsubscribe = onSnapshot(q, async (snapshot) => {
       const messagesList = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
       setMessages(messagesList);
+      
+      // Mark unread messages as read
+      snapshot.docs.forEach(async (doc) => {
+        if (doc.data().receiverId === currentUser.uid && !doc.data().read) {
+          await setDoc(doc.ref, { read: true }, { merge: true });
+        }
+      });
+      
       scrollToBottom();
     });
 
@@ -385,7 +419,26 @@ function Chat() {
                     <span className="status-indicator online"></span>
                   </div>
                   <div className="user-info">
-                    <p className="user-name">{user.displayName || 'User'}</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <p className="user-name">{user.displayName || 'User'}</p>
+                      {unreadCounts[user.id] > 0 && (
+                        <span style={{
+                          background: '#ff4757',
+                          color: 'white',
+                          borderRadius: '50%',
+                          width: '20px',
+                          height: '20px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '11px',
+                          fontWeight: 'bold',
+                          minWidth: '20px'
+                        }}>
+                          {unreadCounts[user.id]}
+                        </span>
+                      )}
+                    </div>
                     <p className="user-email">{user.email}</p>
                     <p style={{ margin: '2px 0', fontSize: '11px', color: '#999', fontFamily: 'monospace' }}>
                       ID: {user.id.substring(0, 8)}...
