@@ -4,13 +4,11 @@ import {
   collection, 
   addDoc, 
   query, 
-  where, 
   orderBy, 
   onSnapshot,
   getDocs,
   setDoc,
   doc,
-  Timestamp,
   serverTimestamp
 } from 'firebase/firestore';
 import '../styles/chat.css';
@@ -135,23 +133,25 @@ function Chat() {
       {/* Users List Panel */}
       <div className="chat-sidebar">
         <div className="chat-header">
-          <h3>💬 Messages</h3>
+          <h3>💬 Direct Messages</h3>
         </div>
 
         <div className="search-box">
           <input
             type="text"
-            placeholder="Search users..."
+            placeholder="Search contacts..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="search-input"
           />
+          <span className="search-icon">🔍</span>
         </div>
 
         <div className="users-list">
           {filteredUsers.length === 0 ? (
             <div className="no-users">
-              <p>No users found</p>
+              <p>No contacts found</p>
+              <span className="no-users-icon">👥</span>
             </div>
           ) : (
             filteredUsers.map(user => (
@@ -160,12 +160,14 @@ function Chat() {
                 className={`user-item ${selectedUser?.id === user.id ? 'active' : ''}`}
                 onClick={() => setSelectedUser(user)}
               >
-                <div className="user-avatar">
-                  {user.photoURL ? (
-                    <img src={user.photoURL} alt={user.displayName} />
-                  ) : (
-                    <span>{user.displayName?.[0] || user.email?.[0] || 'U'}</span>
-                  )}
+                <div className="user-avatar-wrapper">
+                  <div className="user-avatar">
+                    {user.photoURL ? (
+                      <img src={user.photoURL} alt={user.displayName} />
+                    ) : (
+                      <span>{user.displayName?.[0] || user.email?.[0] || 'U'}</span>
+                    )}
+                  </div>
                   <span className="status-indicator online"></span>
                 </div>
                 <div className="user-info">
@@ -198,66 +200,85 @@ function Chat() {
                   <p className="chat-user-email">{selectedUser.email}</p>
                 </div>
               </div>
+              <div className="chat-actions">
+                <button className="action-icon" title="Call">📞</button>
+                <button className="action-icon" title="Video">📹</button>
+                <button className="action-icon" title="More">⋮</button>
+              </div>
             </div>
 
             {/* Messages List */}
             <div className="messages-list">
               {messages.length === 0 ? (
                 <div className="empty-chat">
-                  <p>👋 No messages yet. Start a conversation!</p>
+                  <p className="empty-emoji">💬</p>
+                  <p className="empty-text">No messages yet</p>
+                  <p className="empty-subtext">Start a conversation with {selectedUser.displayName || 'this user'}</p>
                 </div>
               ) : (
                 messages.map(message => (
                   <div
                     key={message.id}
-                    className={`message ${message.senderId === currentUser.uid ? 'sent' : 'received'}`}
+                    className={`message-group ${message.senderId === currentUser.uid ? 'sent' : 'received'}`}
                   >
-                    <div className="message-avatar">
-                      {message.senderId === currentUser.uid ? (
-                        currentUser.photoURL ? (
-                          <img src={currentUser.photoURL} alt="You" title="You" />
-                        ) : (
-                          <span title="You">{currentUser.displayName?.[0] || currentUser.email?.[0] || 'U'}</span>
-                        )
-                      ) : (
-                        selectedUser.photoURL ? (
+                    {message.senderId !== currentUser.uid && (
+                      <div className="message-avatar">
+                        {selectedUser.photoURL ? (
                           <img src={selectedUser.photoURL} alt={selectedUser.displayName} />
                         ) : (
                           <span>{selectedUser.displayName?.[0] || selectedUser.email?.[0] || 'U'}</span>
-                        )
-                      )}
-                    </div>
-                    <div className="message-content">
-                      <p className="message-text">{message.text}</p>
-                      <p className="message-time">
+                        )}
+                      </div>
+                    )}
+                    <div className="message-bubble">
+                      <div className="message-text">{message.text}</div>
+                      <div className="message-time">
                         {message.timestamp?.toDate?.()?.toLocaleTimeString('en-US', {
                           hour: '2-digit',
-                          minute: '2-digit'
+                          minute: '2-digit',
+                          hour12: true
                         }) || 'Just now'}
-                      </p>
+                      </div>
                     </div>
+                    {message.senderId === currentUser.uid && (
+                      <div className="message-avatar">
+                        {currentUser.photoURL ? (
+                          <img src={currentUser.photoURL} alt="You" />
+                        ) : (
+                          <span>{currentUser.displayName?.[0] || currentUser.email?.[0] || 'U'}</span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 ))
               )}
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Message Input */}
-            <form onSubmit={sendMessage} className="message-input-form">
-              <input
-                type="text"
-                value={messageText}
-                onChange={(e) => setMessageText(e.target.value)}
-                placeholder="Type a message..."
-                className="message-input"
-                disabled={loading}
-              />
+            {/* Message Input Box - Social Media Style */}
+            <form onSubmit={sendMessage} className="message-input-box">
+              <div className="input-wrapper">
+                <input
+                  type="text"
+                  value={messageText}
+                  onChange={(e) => setMessageText(e.target.value)}
+                  placeholder="Aa"
+                  className="message-input"
+                  disabled={loading}
+                />
+                <div className="input-actions">
+                  <button type="button" className="action-btn" title="Emoji">😊</button>
+                  <button type="button" className="action-btn" title="Add file">📎</button>
+                  <button type="button" className="action-btn" title="Add image">🖼️</button>
+                </div>
+              </div>
               <button
                 type="submit"
-                className={`send-button ${loading ? 'loading' : ''}`}
+                className={`send-btn ${loading ? 'loading' : ''}`}
                 disabled={loading || !messageText.trim()}
+                title="Send message"
               >
-                {loading ? '📤' : '📨'}
+                {loading ? '⏳' : '➤'}
               </button>
             </form>
           </>
@@ -265,8 +286,8 @@ function Chat() {
           <div className="no-chat-selected">
             <div className="empty-state">
               <p className="emoji">💬</p>
-              <p className="title">Select a chat to start messaging</p>
-              <p className="subtitle">Choose a user from the list to begin a conversation</p>
+              <p className="title">Select a conversation to start</p>
+              <p className="subtitle">Choose a contact from the list or search for someone</p>
             </div>
           </div>
         )}
