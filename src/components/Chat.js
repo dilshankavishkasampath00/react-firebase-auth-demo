@@ -161,12 +161,15 @@ function Chat() {
 
   // Search user by ID directly from Firebase
   const searchUserById = async (userId) => {
-    if (!userId.trim()) {
+    const trimmedId = userId.trim();
+    if (!trimmedId) {
+      alert('⚠️ Please enter a user ID to search');
       return;
     }
 
     try {
-      const userRef = doc(db, 'users', userId.trim());
+      // First, try exact match
+      const userRef = doc(db, 'users', trimmedId);
       const userSnap = await getDoc(userRef);
       
       if (userSnap.exists()) {
@@ -179,11 +182,25 @@ function Chat() {
         if (userData.id !== currentUser.uid) {
           setSelectedUser(userData);
           setSearchQuery('');
+          return;
         } else {
-          alert('❌ Cannot chat with yourself');
+          alert('⚠️ Cannot chat with yourself');
+          return;
         }
+      }
+      
+      // If exact match not found, search in loaded users list
+      const foundUser = users.find(u => 
+        u.id === trimmedId || 
+        u.id.includes(trimmedId) ||
+        u.email === trimmedId
+      );
+      
+      if (foundUser) {
+        setSelectedUser(foundUser);
+        setSearchQuery('');
       } else {
-        alert('❌ User ID not found in the system');
+        alert('❌ User ID not found. Please check the ID and try again.');
       }
     } catch (error) {
       console.error('Error searching user:', error);
@@ -237,7 +254,7 @@ function Chat() {
             className="search-input"
           />
           <span className="search-icon">🔍</span>
-          {searchQuery.length > 15 && (
+          {searchQuery.length > 0 && (
             <button
               type="button"
               onClick={() => searchUserById(searchQuery)}
@@ -273,7 +290,10 @@ function Chat() {
             <div className="no-users">
               <p className="no-users-icon">🔎</p>
               <p>No matches found</p>
-              <p style={{ fontSize: '12px', color: '#999', marginTop: '5px' }}>Try searching by user ID, email, or name</p>
+              <p style={{ fontSize: '12px', color: '#999', marginTop: '5px' }}>Try a different search term</p>
+              <p style={{ fontSize: '11px', color: '#aaa', marginTop: '10px', fontStyle: 'italic' }}>
+                💡 Type a user ID above and click Search to find members
+              </p>
             </div>
           ) : (
             <>
