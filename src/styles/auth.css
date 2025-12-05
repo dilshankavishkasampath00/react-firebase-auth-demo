@@ -153,6 +153,8 @@ button {
 .google-icon {
   width: 18px;
   height: 18px;
+  fill: currentColor;
+  color: inherit;
 }
 
 .button-group {
