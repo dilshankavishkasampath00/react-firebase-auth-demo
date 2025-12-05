@@ -77,7 +77,7 @@ function Chat() {
     } finally {
       setRefreshing(false);
     }
-  };  // Save user data on login
+  };  // Save user data on login - with retry logic
   useEffect(() => {
     if (!currentUser) return;
 
@@ -90,14 +90,18 @@ function Chat() {
           displayName: currentUser.displayName || 'User',
           photoURL: currentUser.photoURL,
           lastSeen: serverTimestamp(),
-          status: 'online'
+          status: 'online',
+          createdAt: serverTimestamp()
         }, { merge: true });
+        console.log('✅ User data saved:', currentUser.uid);
       } catch (error) {
-        console.error('Error saving user data:', error);
+        console.error('❌ Error saving user data:', error);
       }
     };
 
     saveUserData();
+    const interval = setInterval(saveUserData, 30000); // Update every 30 seconds
+    return () => clearInterval(interval);
   }, [currentUser]);
 
   // Fetch messages for selected conversation
@@ -232,7 +236,7 @@ function Chat() {
       <div className="chat-sidebar">
         <div className="chat-header">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
-            <h3 style={{ margin: 0 }}>💬 Members</h3>
+            <h3 style={{ margin: 0 }}>💬 Members ({users.length})</h3>
             <button 
               onClick={refreshUsers}
               disabled={refreshing}
@@ -297,6 +301,22 @@ function Chat() {
               <p className="no-users-icon">👥</p>
               <p>No members yet</p>
               <p style={{ fontSize: '12px', color: '#999', marginTop: '5px' }}>Be the first to join or wait for others</p>
+              <button 
+                onClick={refreshUsers}
+                style={{
+                  marginTop: '15px',
+                  padding: '8px 16px',
+                  background: '#0084ff',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  fontWeight: 600
+                }}
+              >
+                Refresh Again
+              </button>
             </div>
           ) : filteredUsers.length === 0 ? (
             <div className="no-users">
