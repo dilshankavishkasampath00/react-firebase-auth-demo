@@ -88,7 +88,7 @@ function Chat() {
           uid: currentUser.uid,
           email: currentUser.email,
           displayName: currentUser.displayName || 'User',
-          photoURL: currentUser.photoURL,
+          photoURL: currentUser.photoURL || '',
           lastSeen: serverTimestamp(),
           status: 'online',
           createdAt: serverTimestamp()

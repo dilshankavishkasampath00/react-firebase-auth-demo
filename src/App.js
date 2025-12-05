@@ -4,6 +4,7 @@ import Login from './components/Login';
 import Signup from './components/Signup';
 import ForgotPassword from './components/ForgotPassword';
 import Dashboard from './components/Dashboard';
+import TestFirestore from './components/TestFirestore';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/test" element={<TestFirestore />} />
       </Routes>
     </Router>
   );
