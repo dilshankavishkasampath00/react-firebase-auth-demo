@@ -875,3 +875,25 @@
     display: none;
   }
 }
+
+/* ===== CHAT VIEW STYLING ===== */
+.dashboard-main .chat-container {
+  height: 100%;
+  max-width: 100%;
+}
+
+.dashboard-main .chat-container .chat-sidebar {
+  background: white;
+}
+
+.dashboard-main .chat-container .messages-list {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.dashboard-main .message.sent .message-text {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.dashboard-main .send-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}

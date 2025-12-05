@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signOut, onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../firebase';
+import Chat from './Chat';
 import '../styles/dashboard.css';
 
 function Dashboard() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showProfile, setShowProfile] = useState(false);
+  const [activeTab, setActiveTab] = useState('dashboard');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -75,8 +77,17 @@ function Dashboard() {
       {/* Left Sidebar */}
       <div className="dashboard-sidebar">
         <div className="sidebar-menu">
-          <div className="menu-item active">
+          <div 
+            className={`menu-item ${activeTab === 'dashboard' ? 'active' : ''}`}
+            onClick={() => setActiveTab('dashboard')}
+          >
             <span>📊</span> Dashboard
+          </div>
+          <div 
+            className={`menu-item ${activeTab === 'chat' ? 'active' : ''}`}
+            onClick={() => setActiveTab('chat')}
+          >
+            <span>💬</span> Chat
           </div>
           <div className="menu-item" onClick={() => navigate('/forgot-password')}>
             <span>🔐</span> Change Password
@@ -92,8 +103,12 @@ function Dashboard() {
 
       {/* Main Content */}
       <div className="dashboard-main">
-        {/* Hero Section with Animation */}
-        <div className="dashboard-hero">
+        {activeTab === 'chat' ? (
+          <Chat />
+        ) : (
+          <>
+            {/* Hero Section with Animation */}
+            <div className="dashboard-hero">
           <div className="hero-content">
             <h2 className="hero-title">Welcome, {user?.displayName || 'User'}! 👋</h2>
             <p className="hero-subtitle">You are now logged in to your secure account</p>
@@ -180,6 +195,8 @@ function Dashboard() {
             </button>
           </div>
         </div>
+          </>
+        )}
       </div>
 
       {/* Right Info Panel */}
