@@ -9,7 +9,8 @@ import {
   getDocs,
   setDoc,
   doc,
-  serverTimestamp
+  serverTimestamp,
+  getDoc
 } from 'firebase/firestore';
 import '../styles/chat.css';
 
@@ -158,6 +159,49 @@ function Chat() {
     );
   });
 
+  // Search user by ID directly from Firebase
+  const searchUserById = async (userId) => {
+    if (!userId.trim()) {
+      return;
+    }
+
+    try {
+      const userRef = doc(db, 'users', userId.trim());
+      const userSnap = await getDoc(userRef);
+      
+      if (userSnap.exists()) {
+        const userData = {
+          id: userSnap.id,
+          ...userSnap.data()
+        };
+        
+        // Check if user is not current user
+        if (userData.id !== currentUser.uid) {
+          setSelectedUser(userData);
+          setSearchQuery('');
+        } else {
+          alert('❌ Cannot chat with yourself');
+        }
+      } else {
+        alert('❌ User ID not found in the system');
+      }
+    } catch (error) {
+      console.error('Error searching user:', error);
+      alert('❌ Error searching user. Please try again.');
+    }
+  };
+
+  // Handle Enter key to search by ID
+  const handleSearchKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      const searchTerm = searchQuery.trim();
+      // If search looks like a user ID (longer string or contains special chars), search directly
+      if (searchTerm.length > 15) {
+        searchUserById(searchTerm);
+      }
+    }
+  };
+
   return (
     <div className="chat-container">
       {/* Users List Panel */}
@@ -189,9 +233,33 @@ function Chat() {
             placeholder="Search by name, email, or ID..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyPress={handleSearchKeyPress}
             className="search-input"
           />
           <span className="search-icon">🔍</span>
+          {searchQuery.length > 15 && (
+            <button
+              type="button"
+              onClick={() => searchUserById(searchQuery)}
+              style={{
+                position: 'absolute',
+                right: '32px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                background: '#0084ff',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                padding: '4px 8px',
+                fontSize: '11px',
+                cursor: 'pointer',
+                fontWeight: 600
+              }}
+              title="Search by User ID"
+            >
+              Search
+            </button>
+          )}
         </div>
 
         <div className="users-list">
