@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, GithubAuthProvider } from 'firebase/auth';
-import { auth } from '../firebase';
+import { auth, db } from '../firebase';
+import { setDoc, doc, serverTimestamp } from 'firebase/firestore';
 import '../styles/auth.css';
 
 function Login() {
@@ -16,10 +17,23 @@ function Login() {
     setError('');
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      
+      // Save user to Firestore on login
+      await setDoc(doc(db, 'users', userCredential.user.uid), {
+        uid: userCredential.user.uid,
+        email: userCredential.user.email,
+        displayName: userCredential.user.displayName || 'User',
+        photoURL: userCredential.user.photoURL || '',
+        status: 'online',
+        lastSeen: serverTimestamp()
+      }, { merge: true });
+      
+      console.log('✅ User logged in and updated in Firestore');
       navigate('/dashboard');
     } catch (err) {
       setError(err.message);
+      console.error('❌ Login error:', err);
     } finally {
       setLoading(false);
     }
@@ -34,6 +48,17 @@ function Login() {
       provider.addScope('email');
       const result = await signInWithPopup(auth, provider);
       if (result.user) {
+        // Save Google user to Firestore
+        await setDoc(doc(db, 'users', result.user.uid), {
+          uid: result.user.uid,
+          email: result.user.email,
+          displayName: result.user.displayName || 'User',
+          photoURL: result.user.photoURL || '',
+          status: 'online',
+          lastSeen: serverTimestamp()
+        }, { merge: true });
+        
+        console.log('✅ Google user logged in and updated in Firestore');
         navigate('/dashboard');
       }
     } catch (err) {
@@ -59,6 +84,17 @@ function Login() {
       provider.addScope('user:email');
       const result = await signInWithPopup(auth, provider);
       if (result.user) {
+        // Save GitHub user to Firestore
+        await setDoc(doc(db, 'users', result.user.uid), {
+          uid: result.user.uid,
+          email: result.user.email,
+          displayName: result.user.displayName || 'User',
+          photoURL: result.user.photoURL || '',
+          status: 'online',
+          lastSeen: serverTimestamp()
+        }, { merge: true });
+        
+        console.log('✅ GitHub user logged in and updated in Firestore');
         navigate('/dashboard');
       }
     } catch (err) {
