@@ -123,9 +123,36 @@ button {
   background: #f8f8f8;
 }
 
+.btn-social {
+  background: white;
+  color: #333;
+  border: 2px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.btn-social:hover {
+  background: #f8f8f8;
+  transform: translateY(-2px);
+}
+
+.btn-social:first-child:hover {
+  border-color: #4285F4;
+  color: #4285F4;
+}
+
+.btn-social:last-child:hover {
+  border-color: #333;
+}
+
+.social-icon,
 .google-icon {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
 }
 
 .button-group {
