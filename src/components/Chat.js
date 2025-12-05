@@ -20,10 +20,11 @@ function Chat() {
   const [messageText, setMessageText] = useState('');
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
   const messagesEndRef = useRef(null);
   const currentUser = auth.currentUser;
 
-  // Fetch all users
+  // Fetch all users - Auto-refresh every 5 seconds
   useEffect(() => {
     if (!currentUser) return;
 
@@ -44,7 +45,29 @@ function Chat() {
     };
 
     fetchUsers();
+    const interval = setInterval(fetchUsers, 5000);
+    return () => clearInterval(interval);
   }, [currentUser]);
+
+  // Manual refresh users
+  const refreshUsers = async () => {
+    setRefreshing(true);
+    try {
+      const usersRef = collection(db, 'users');
+      const snapshot = await getDocs(usersRef);
+      const usersList = snapshot.docs
+        .map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }))
+        .filter(user => user.id !== currentUser.uid);
+      setUsers(usersList);
+    } catch (error) {
+      console.error('Error refreshing users:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   // Save user data on login
   useEffect(() => {
@@ -123,23 +146,47 @@ function Chat() {
     }
   };
 
-  const filteredUsers = users.filter(user =>
-    user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (user.displayName && user.displayName.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const filteredUsers = users.filter(user => {
+    const searchLower = searchQuery.toLowerCase().trim();
+    if (!searchLower) return true;
+    
+    // Search by user ID, email, or display name
+    return (
+      user.id.toLowerCase().includes(searchLower) ||
+      user.email.toLowerCase().includes(searchLower) ||
+      (user.displayName && user.displayName.toLowerCase().includes(searchLower))
+    );
+  });
 
   return (
     <div className="chat-container">
       {/* Users List Panel */}
       <div className="chat-sidebar">
         <div className="chat-header">
-          <h3>💬 Direct Messages</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
+            <h3 style={{ margin: 0 }}>💬 Members</h3>
+            <button 
+              onClick={refreshUsers}
+              disabled={refreshing}
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: refreshing ? 'not-allowed' : 'pointer',
+                fontSize: '16px',
+                opacity: refreshing ? 0.5 : 1,
+                animation: refreshing ? 'spin 1s linear infinite' : 'none'
+              }}
+              title="Refresh users"
+            >
+              🔄
+            </button>
+          </div>
         </div>
 
         <div className="search-box">
           <input
             type="text"
-            placeholder="Search contacts..."
+            placeholder="Search by name, email, or ID..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="search-input"
@@ -148,34 +195,50 @@ function Chat() {
         </div>
 
         <div className="users-list">
-          {filteredUsers.length === 0 ? (
+          {users.length === 0 ? (
             <div className="no-users">
-              <p>No contacts found</p>
-              <span className="no-users-icon">👥</span>
+              <p className="no-users-icon">👥</p>
+              <p>No members yet</p>
+              <p style={{ fontSize: '12px', color: '#999', marginTop: '5px' }}>Invite others to join</p>
+            </div>
+          ) : filteredUsers.length === 0 ? (
+            <div className="no-users">
+              <p className="no-users-icon">🔎</p>
+              <p>No matches found</p>
+              <p style={{ fontSize: '12px', color: '#999', marginTop: '5px' }}>Try searching by user ID, email, or name</p>
             </div>
           ) : (
-            filteredUsers.map(user => (
-              <div
-                key={user.id}
-                className={`user-item ${selectedUser?.id === user.id ? 'active' : ''}`}
-                onClick={() => setSelectedUser(user)}
-              >
-                <div className="user-avatar-wrapper">
-                  <div className="user-avatar">
-                    {user.photoURL ? (
-                      <img src={user.photoURL} alt={user.displayName} />
-                    ) : (
-                      <span>{user.displayName?.[0] || user.email?.[0] || 'U'}</span>
-                    )}
-                  </div>
-                  <span className="status-indicator online"></span>
-                </div>
-                <div className="user-info">
-                  <p className="user-name">{user.displayName || 'User'}</p>
-                  <p className="user-email">{user.email}</p>
-                </div>
+            <>
+              <div style={{ padding: '8px 12px', fontSize: '12px', color: '#999', fontWeight: 600 }}>
+                {filteredUsers.length} {filteredUsers.length === 1 ? 'member' : 'members'} found
               </div>
-            ))
+              {filteredUsers.map(user => (
+                <div
+                  key={user.id}
+                  className={`user-item ${selectedUser?.id === user.id ? 'active' : ''}`}
+                  onClick={() => setSelectedUser(user)}
+                  title={`ID: ${user.id}`}
+                >
+                  <div className="user-avatar-wrapper">
+                    <div className="user-avatar">
+                      {user.photoURL ? (
+                        <img src={user.photoURL} alt={user.displayName} />
+                      ) : (
+                        <span>{user.displayName?.[0] || user.email?.[0] || 'U'}</span>
+                      )}
+                    </div>
+                    <span className="status-indicator online"></span>
+                  </div>
+                  <div className="user-info">
+                    <p className="user-name">{user.displayName || 'User'}</p>
+                    <p className="user-email">{user.email}</p>
+                    <p style={{ margin: '2px 0', fontSize: '11px', color: '#999', fontFamily: 'monospace' }}>
+                      ID: {user.id.substring(0, 8)}...
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </>
           )}
         </div>
       </div>
