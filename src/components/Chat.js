@@ -20,34 +20,40 @@ function Chat() {
   const [messages, setMessages] = useState([]);
   const [messageText, setMessageText] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingUsers, setLoadingUsers] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const messagesEndRef = useRef(null);
   const currentUser = auth.currentUser;
 
-  // Fetch all users - Auto-refresh every 5 seconds
+  // Fetch all users with real-time listener
   useEffect(() => {
     if (!currentUser) return;
 
-    const fetchUsers = async () => {
-      try {
-        const usersRef = collection(db, 'users');
-        const snapshot = await getDocs(usersRef);
+    setLoadingUsers(true);
+    const usersRef = collection(db, 'users');
+    
+    const unsubscribe = onSnapshot(
+      usersRef,
+      (snapshot) => {
         const usersList = snapshot.docs
           .map(doc => ({
             id: doc.id,
             ...doc.data()
           }))
-          .filter(user => user.id !== currentUser.uid);
+          .filter(user => user.id !== currentUser.uid)
+          .sort((a, b) => (a.displayName || '').localeCompare(b.displayName || ''));
+        
         setUsers(usersList);
-      } catch (error) {
+        setLoadingUsers(false);
+      },
+      (error) => {
         console.error('Error fetching users:', error);
+        setLoadingUsers(false);
       }
-    };
+    );
 
-    fetchUsers();
-    const interval = setInterval(fetchUsers, 5000);
-    return () => clearInterval(interval);
+    return () => unsubscribe();
   }, [currentUser]);
 
   // Manual refresh users
@@ -61,16 +67,17 @@ function Chat() {
           id: doc.id,
           ...doc.data()
         }))
-        .filter(user => user.id !== currentUser.uid);
-      setUsers(usersList);
+        .filter(user => user.id !== currentUser.uid)
+        .sort((a, b) => (a.displayName || '').localeCompare(b.displayName || ''));
+        
+        setUsers(usersList);
+        setLoadingUsers(false);
     } catch (error) {
       console.error('Error refreshing users:', error);
     } finally {
       setRefreshing(false);
     }
-  };
-
-  // Save user data on login
+  };  // Save user data on login
   useEffect(() => {
     if (!currentUser) return;
 
@@ -280,11 +287,16 @@ function Chat() {
         </div>
 
         <div className="users-list">
-          {users.length === 0 ? (
+          {loadingUsers ? (
+            <div className="no-users">
+              <p style={{ fontSize: '18px', animation: 'spin 1s linear infinite' }}>⏳</p>
+              <p>Loading members...</p>
+            </div>
+          ) : users.length === 0 ? (
             <div className="no-users">
               <p className="no-users-icon">👥</p>
               <p>No members yet</p>
-              <p style={{ fontSize: '12px', color: '#999', marginTop: '5px' }}>Invite others to join</p>
+              <p style={{ fontSize: '12px', color: '#999', marginTop: '5px' }}>Be the first to join or wait for others</p>
             </div>
           ) : filteredUsers.length === 0 ? (
             <div className="no-users">
@@ -298,7 +310,7 @@ function Chat() {
           ) : (
             <>
               <div style={{ padding: '8px 12px', fontSize: '12px', color: '#999', fontWeight: 600 }}>
-                {filteredUsers.length} {filteredUsers.length === 1 ? 'member' : 'members'} found
+                👥 {filteredUsers.length} {filteredUsers.length === 1 ? 'member' : 'members'} found
               </div>
               {filteredUsers.map(user => (
                 <div
